@@ -2,12 +2,12 @@
 #-*- coding:utf-8 -*-
 __author__ = 'yanqiong'
 
+import random
 import uuid
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from random import Random
 
 
-def _generate_uuid(RD: 'Random', prefix=''):
+RD = random.Random()  # 初始化随机数引擎
+
+
+def _generate_uuid(prefix=''):
     return f"{prefix + '_' if prefix else ''}{uuid.UUID(int=RD.getrandbits(128)).hex}"

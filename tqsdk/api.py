@@ -23,7 +23,6 @@ import functools
 import json
 import logging
 import os
-import random
 import re
 import ssl
 import sys
@@ -55,8 +54,6 @@ class TqApi(object):
 
     通常情况下, 一个线程中 **应该只有一个** TqApi的实例, 它负责维护网络连接, 接收行情及账户数据, 并在内存中维护业务数据截面
     """
-
-    RD = random.Random()  # 初始化随机数引擎
 
     def __init__(self, account: Union[TqAccount, TqSim, None] = None, auth: Optional[str] = None, url: Optional[str] = None,
                  backtest: Union[TqBacktest, TqReplay, None] = None, web_gui: [bool, str] = False, debug: Optional[str] = None,
@@ -464,7 +461,7 @@ class TqApi(object):
         serial = self._requests["klines"].get(request, None)
         pack = {
             "aid": "set_chart",
-            "chart_id": chart_id if chart_id is not None else _generate_uuid(TqApi.RD, "PYSDK_realtime"),
+            "chart_id": chart_id if chart_id is not None else _generate_uuid("PYSDK_realtime"),
             "ins_list": ",".join(symbol),
             "duration": dur_id,
             "view_width": data_length if len(symbol) == 1 else 8964,
@@ -549,7 +546,7 @@ class TqApi(object):
         serial = self._requests["ticks"].get(request, None)
         pack = {
             "aid": "set_chart",
-            "chart_id": chart_id if chart_id is not None else _generate_uuid(TqApi.RD, "PYSDK_realtime"),
+            "chart_id": chart_id if chart_id is not None else _generate_uuid("PYSDK_realtime"),
             "ins_list": symbol,
             "duration": 0,
             "view_width": data_length,
@@ -621,7 +618,7 @@ class TqApi(object):
             raise Exception("下单手数(volume) %s 错误, 请检查 volume 是否填写正确" % (volume))
         limit_price = float(limit_price) if limit_price is not None else None
         if not order_id:
-            order_id = _generate_uuid(TqApi.RD)
+            order_id = _generate_uuid()
         (exchange_id, instrument_id) = symbol.split(".", 1)
         msg = {
             "aid": "insert_order",
@@ -1595,7 +1592,7 @@ class TqApi(object):
             try:
                 async with websockets.connect(url, **keywords) as client:
                     # 发送网络连接建立的通知，code = 2019112901
-                    notify_id = _generate_uuid(TqApi.RD)
+                    notify_id = _generate_uuid()
                     notify = {
                         "type": "MESSAGE",
                         "level": "INFO",
@@ -1733,7 +1730,7 @@ class TqApi(object):
             # 而这里的 except 又需要处理所有子函数及子函数的子函数等等可能抛出的例外, 因此这里只能遇到问题之后再补, 并且无法避免 false positive 和 false negative
             except (websockets.exceptions.ConnectionClosed, OSError):
                 # 发送网络连接断开的通知，code = 2019112911
-                notify_id = _generate_uuid(TqApi.RD)
+                notify_id = _generate_uuid()
                 notify = {
                     "type": "MESSAGE",
                     "level": "WARNING",
@@ -1907,7 +1904,7 @@ class TqApi(object):
             api.draw_text(klines, "测试413423", x=indic, y=value, color=0xFF00FF00)
         """
         if id is None:
-            id = _generate_uuid(TqApi.RD)
+            id = _generate_uuid()
         if y is None:
             y = base_k_dataframe["close"].iloc[-1]
         serial = {
@@ -1950,7 +1947,7 @@ class TqApi(object):
             width (int): 线宽度, 可选, 缺省为 1
         """
         if id is None:
-            id = _generate_uuid(TqApi.RD)
+            id = _generate_uuid()
         serial = {
             "type": line_type,
             "x1": self._offset_to_x(base_k_dataframe, x1),
